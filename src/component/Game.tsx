@@ -5,10 +5,13 @@ import { PanGestureHandler } from "react-native-gesture-handler";
 import { Coordinate, Direction, GestureEventType } from "../types/type";
 import Snake from "./Snake";
 import { CheckGameOVer } from "../utils/checkGameOver";
+import Food from "./Food";
+import { checkEatsFood } from "../utils/checkEatsFood";
+import { randomFoodPosition } from "../utils/randomFoodPosition";
 
 const SNAKE_INITIAL_POSITION = [{ x: 5, y: 5 }];
 const FOOD_INITIAL_POSITION = { x: 5, y: 20 };
-const GAME_BOUNDS = { xMin: 0, xMax: 35, yMin: 0, yMax: 68 }; //these boundaries determine the playable area for the snake within the game, and if the snake tries to go outside this area, the game will end
+const GAME_BOUNDS = { xMin: 0, xMax: 32, yMin: 0, yMax: 68 }; //these boundaries determine the playable area for the snake within the game, and if the snake tries to go outside this area, the game will end
 const MOVE_INTERVAL = 50;
 const SCORE_INCREMENT = 10;
 
@@ -20,6 +23,7 @@ export default function Game(): JSX.Element {
   const [food, setFood] = React.useState<Coordinate>(FOOD_INITIAL_POSITION);
   const [isGameOver, setIsGameOver] = React.useState<boolean>(false);
   const [isPaused, setIsPaused] = React.useState<boolean>(false);
+  const [score, setScore] = React.useState<number>(0);
 
   React.useEffect(() => {
     if (!isGameOver) {
@@ -56,9 +60,15 @@ export default function Game(): JSX.Element {
       default:
         break;
     }
-    //
+    //if eats food
 
-    setSnake([newHead, ...snake.slice(0, -1)]);
+    if (checkEatsFood(newHead, food, 2)) {
+      setFood(randomFoodPosition(GAME_BOUNDS.xMax, GAME_BOUNDS.yMax));
+      setSnake([newHead, ...snake]); //grow snake
+      setScore(score + SCORE_INCREMENT);
+    } else {
+      setSnake([newHead, ...snake.slice(0, -1)]);
+    }
   };
 
   const handleGesture = (event: GestureEventType) => {
@@ -89,6 +99,7 @@ export default function Game(): JSX.Element {
       <SafeAreaView style={styles.container}>
         <View style={styles.boundaries}>
           <Snake snake={snake} />
+          <Food x={food.x} y={food.y} />
         </View>
       </SafeAreaView>
     </PanGestureHandler>
