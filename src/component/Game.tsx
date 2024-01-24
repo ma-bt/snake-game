@@ -38,7 +38,7 @@ export default function Game(): JSX.Element {
     const snakeHead = snake[0];
     const newHead = { ...snakeHead }; //creating a copy
 
-    //game over
+    //condition for game over
     if (CheckGameOVer(snakeHead, GAME_BOUNDS)) {
       setIsGameOver((prev) => !prev);
       return;
